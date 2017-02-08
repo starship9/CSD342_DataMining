@@ -28,7 +28,7 @@ class ItemTuple {
 }
 
 public class AprioriTest {
-	static Set<ItemTuple> c;
+	static Set<ItemTuple> candidateItem;
 	static Set<ItemTuple> l;
 	static int d[][];
 	static int minSupThreshold;
@@ -37,70 +37,70 @@ public class AprioriTest {
 		
             //function defined for getting the connection to a MySQL database
             getDatabase();
-		c = new HashSet<>();
+		candidateItem = new HashSet<>();
 		l = new HashSet<>();
-		Scanner scan = new Scanner(System.in);
+		Scanner sc = new Scanner(System.in);
 		int i, j, m, n;
 		System.out.println("Enter the minimum support (as an integer value):\n");
-		minSupThreshold = scan.nextInt();
-		Set<Integer> candidate_set = new HashSet<>();
+		minSupThreshold = sc.nextInt();
+		Set<Integer> candidateSet = new HashSet<>();
 		for(i=0 ; i < d.length ; i++) {
-			System.out.println("Transaction Number: " + (i+1) + ":");
+			//System.out.println("Transaction Number: " + (i+1) + ":");
 			for(j=0 ; j < d[i].length ; j++) {
-				System.out.print("Item number " + (j+1) + " = ");
-				System.out.println(d[i][j]);
-				candidate_set.add(d[i][j]);
+			//	System.out.print("Item number " + (j+1) + " = ");
+			//	System.out.println(d[i][j]);
+				candidateSet.add(d[i][j]);
 			}
 		}
 		
-		Iterator<Integer> iterator = candidate_set.iterator();
-		while(iterator.hasNext()) {
-			Set<Integer> s = new HashSet<>();
-			s.add(iterator.next());
-			ItemTuple t = new ItemTuple(s, count(s));
-			c.add(t);
+		Iterator<Integer> iter = candidateSet.iterator();
+		while(iter.hasNext()) {
+			Set<Integer> set = new HashSet<>();
+			set.add(iter.next());
+			ItemTuple t = new ItemTuple(set, getFreq(set));
+			candidateItem.add(t);
 		}
 		
-		prune();
-		generateFrequentItemsets();
+		dataClean();
+		generateFreqItemSets();
 	}
 	
 	//calculates the frequencies of each item in the itemsets, should be lesser than the minsup input
-        static int count(Set<Integer> s) {
+        static int getFreq(Set<Integer> s) {
 		int i, j, k;
-		int support = 0;
-		int count;
-		boolean containsElement;
+		int supportThresh = 0;
+		int cnt;
+		boolean checkElem;
 		for(i=0 ; i < d.length ; i++) {
-			count = 0;
-			Iterator<Integer> iterator = s.iterator();
-			while(iterator.hasNext()) {
-				int element = iterator.next();
-				containsElement = false;
+			cnt = 0;
+			Iterator<Integer> iter = s.iterator();
+			while(iter.hasNext()) {
+				int elem = iter.next();
+				checkElem = false;
 				for(k=0 ; k < d[i].length ; k++) {
-					if(element == d[i][k]) {
-						containsElement = true;
-						count++;
+					if(elem == d[i][k]) {
+						checkElem = true;
+						cnt++;
 						break;
 					}
 				}
-				if(!containsElement) {
+				if(!checkElem) {
 					break;
 				}
 			}
-			if(count == s.size()) {
-				support++;
+			if(cnt == s.size()) {
+				supportThresh++;
 			}
 		}
-		return support;
+		return supportThresh;
 	}
 	
 	//only adds those values that appear atleast minsup times in the dataset
-        static void prune() {
+        static void dataClean() {
 		l.clear();
-		Iterator<ItemTuple> iterator = c.iterator();
-		while(iterator.hasNext()) {
-			ItemTuple t = iterator.next();
+		Iterator<ItemTuple> iter = candidateItem.iterator();
+		while(iter.hasNext()) {
+			ItemTuple t = iter.next();
 			if(t.minSupThreshold >= minSupThreshold) {
 				l.add(t);
 			}
@@ -112,17 +112,17 @@ public class AprioriTest {
 	}
 	
         //generates all possible itemsets satisfying the minimum minSupThreshold threshold condition
-	static void generateFrequentItemsets() {
-		boolean toBeContinued = true;
-		int element = 0;
+	static void generateFreqItemSets() {
+		boolean checkContinue = true;
+		int elem = 0;
 		int size = 1;
-		Set<Set> candidate_set = new HashSet<>();
-		while(toBeContinued) {
-			candidate_set.clear();
-			c.clear();
-			Iterator<ItemTuple> iterator = l.iterator();
-			while(iterator.hasNext()) {
-				ItemTuple t1 = iterator.next();
+		Set<Set> candidateSet = new HashSet<>();
+		while(checkContinue) {
+			candidateSet.clear();
+			candidateItem.clear();
+			Iterator<ItemTuple> iter = l.iterator();
+			while(iter.hasNext()) {
+				ItemTuple t1 = iter.next();
 				Set<Integer> temp = t1.itemSet;
 				Iterator<ItemTuple> it2 = l.iterator();
 				while(it2.hasNext()) {
@@ -130,33 +130,33 @@ public class AprioriTest {
 					Iterator<Integer> it3 = t2.itemSet.iterator();
 					while(it3.hasNext()) {
 						try {
-							element = it3.next();
+							elem = it3.next();
 						} catch(ConcurrentModificationException e) {
 							// Sometimes this Exception gets thrown, so simply break in that case.
 							break;
 						}
-						temp.add(element);
+						temp.add(elem);
 						if(temp.size() != size) {
 							Integer[] int_arr = temp.toArray(new Integer[0]);
 							Set<Integer> temp2 = new HashSet<>();
 							for(Integer x : int_arr) {
 								temp2.add(x);
 							}
-							candidate_set.add(temp2);
-							temp.remove(element);
+							candidateSet.add(temp2);
+							temp.remove(elem);
 						}
 					}
 				}
 			}
-			Iterator<Set> candidate_set_iterator = candidate_set.iterator();
+			Iterator<Set> candidate_0set_iterator = candidateSet.iterator();
 			while(candidate_set_iterator.hasNext()) {
 				Set s = candidate_set_iterator.next();
 				// These lines cause warnings, as the candidate_set Set stores a raw set.
-				c.add(new ItemTuple(s, count(s)));
+				candidateItem.add(new ItemTuple(s, getFreq(s)));
 			}
-			prune();
+			dataClean();
 			if(l.size() <= 1) {
-				toBeContinued = false;
+				checkContinue = false;
 			}
 			size++;
 		}
@@ -171,7 +171,6 @@ public class AprioriTest {
 		Class.forName("com.mysql.jdbc.Driver");
 		Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/employeedb","root","SilverRonil1996");
 		Statement s = con.createStatement();
-		
 		//to perform operations on all the items present in the database
                 ResultSet rs = s.executeQuery("SELECT * FROM rand_numbers;"); //apriori is the name of the table in the employeedb database
 		Map<Integer, List <Integer>> m = new HashMap<>();
