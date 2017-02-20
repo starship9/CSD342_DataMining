@@ -172,7 +172,7 @@ public class AprioriTest {
 		Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/employeedb","root","SilverRonil1996");
 		Statement s = con.createStatement();
 		//to perform operations on all the items present in the database
-                ResultSet rs = s.executeQuery("SELECT * FROM rand_numbers;"); //apriori is the name of the table in the employeedb database
+                ResultSet rs = s.executeQuery("SELECT * FROM rand_numbers;"); //rand_numbers is the name of the table in the employeedb database
 		Map<Integer, List <Integer>> m = new HashMap<>();
 		List<Integer> temp;
 		while(rs.next()) {
