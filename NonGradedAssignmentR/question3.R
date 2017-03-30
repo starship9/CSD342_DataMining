@@ -1,0 +1,30 @@
+setwd("/home/starship9/Desktop/SNU/Data Mining/CSD342_DataMining/NonGradedAssignmentR")
+raw.text<-scan("ngla1.txt",what="char",sep="")
+head(raw.text)
+raw.text<-tolower(raw.text)
+wordList.txt<-strsplit(raw.text,"\\W+",perl=TRUE)
+head(wordList.txt)
+wordVector.txt<-unlist(wordList.txt)
+head(wordVector.txt)
+text.freq.list<-table(wordVector.txt)
+library(dplyr)
+textDF<-tbl_df(text.freq.list)
+head(textDF,30)
+#View(textDF)
+#textDF$n
+#textDF$wordVector.txt
+colnames(textDF)<-c("Word","Frequency")
+head(textDF)
+#selecting a random variable
+sample_n(textDF,1)
+textMoreThan10Freq<-filter(textDF,textDF$Frequency>10)
+head(textMoreThan10Freq)
+#text.sortedFreq.list <- sort(text.freq.list)
+#head(text.sortedFreq.list)
+#text.sortedFreq.list
+#text.sortedTable<-paste(names(text.sortedFreq.list),text.sortedFreq.list,sep="    ")
+#head(text.sortedTable)
+library(ggplot2)
+ggplot(textMoreThan10Freq,aes(x=textMoreThan10Freq$Word, y = textMoreThan10Freq$Frequency, fill = textMoreThan10Freq$Word)) + geom_bar(stat="identity")
+#getwd()
+
