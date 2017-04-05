@@ -21,7 +21,16 @@ g
 usa_center <- as.numeric(geocode("United States"))
 USAMap <- ggmap(get_googlemap(center = usa_center,scale = 2, zoom = 4),extent = "normal")
 #USAMap
+for(i in 1:nrow(reqData)) {
+  latlon = geocode(reqData[i,1])
+  #reqData$lat[i] = as.numeric(latlon[1])
+  #reqData$lon[i] = as.numeric(latlon[2])
+  mutate(reqData,lat[i] = as.numeric(latlon[1]))
+  mutate(reqData,lon[i]  = as.numeric(latlon[2]))
+}
 
+names(reqData)
+USAMap + geom_point(aes(x = lat, y = lon),data = reqData,col = "orange", alpha = 0.4,size = reqData$`Observation Count`) + scale_size_continuous(range = range(reqData$`Observation Count`))
 
 #sampleData<-sample_n(reqData,5)
 #sampleData
