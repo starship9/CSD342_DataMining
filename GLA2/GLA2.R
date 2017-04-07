@@ -53,7 +53,7 @@ names(reqData)
 #sampleData
 
 library(leaflet)
-m<-leaflet() %>% addTiles() %>% setView(-72.690940, 41.651426, zoom = 8) %>% addMarkers(lng=reqData$Longitude, lat=reqData$Latitude, popup="<b>Hello</b><br><a href='http://www.trendct.org'>-TrendCT.org</a>")
+m<-leaflet() %>% addTiles() %>% setView(-72.690940, 41.651426, zoom = 8) %>% addCircles(lng=reqData$Longitude, lat=reqData$Latitude, radius = reqData$`Observation Count`,color = reqData$`Parameter Name`,fill = TRUE, fillColor = reqData$`Parameter Name`,popup=reqData$`State Name`)
 m 
 
 
