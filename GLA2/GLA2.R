@@ -13,6 +13,7 @@ View(reqData)
 library(ggmap)
 library(ggplot2)
 
+
 g<-ggplot(sample_n(reqData,20),aes(x = `Parameter Name`, y = `Observation Count`, color = `Parameter Name`)) + geom_point()
 g
 
@@ -52,8 +53,14 @@ names(reqData)
 #}
 #sampleData
 
+
 library(leaflet)
-m<-leaflet() %>% addTiles() %>% setView(-72.690940, 41.651426, zoom = 8) %>% addCircles(lng=reqData$Longitude, lat=reqData$Latitude, radius = reqData$`Observation Count`,color = reqData$`Parameter Name`,fill = TRUE, fillColor = reqData$`Parameter Name`,popup=reqData$`State Name`)
+library(RColorBrewer)
+library(plyr)
+colorCount<-plyr::count(reqData$`Parameter Name`)
+colorCount
+nrow(colorCount)
+m<-leaflet() %>% addTiles() %>% setView(-72.690940, 41.651426, zoom = 8) %>% addCircles(lng=reqData$Longitude, lat=reqData$Latitude,radius = reqData$`Observation Count`,color = reqData$`Parameter Name`,opacity = reqData$`Observation Count`,fill = TRUE, fillColor = reqData$`Parameter Name`,popup=paste(reqData$`State Name`, reqData$`County Name`, reqData$`City Name`, reqData$`Parameter Name`,sep = " | "))
 m 
 
 
