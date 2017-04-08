@@ -60,13 +60,16 @@ library(plyr)
 colorCount<-plyr::count(reqData$`Parameter Name`)
 colorCount
 nrow(colorCount)
-m<-leaflet() %>% addTiles() %>% setView(-72.690940, 41.651426, zoom = 8) %>% addCircles(lng=reqData$Longitude, lat=reqData$Latitude,radius = reqData$`Observation Count`,color = reqData$`Parameter Name`,opacity = reqData$`Observation Count`,fill = TRUE, fillColor = reqData$`Parameter Name`,popup=paste(reqData$`State Name`, reqData$`County Name`, reqData$`City Name`, reqData$`Parameter Name`,sep = " | "))
+labelTitles <- sample_n(tbl_df(reqData$`Parameter Name`),5)
+m<-leaflet() %>% addTiles() %>% setView(-72.690940, 41.651426, zoom = 8) %>% addCircles(lng=reqData$Longitude, lat=reqData$Latitude,radius = reqData$`Observation Count`,color = brewer.pal(12,"Set3"),opacity = reqData$`Observation Count`,fill = TRUE, fillColor = brewer.pal(12,"Set3"),popup=paste(reqData$`State Name`, reqData$`County Name`, reqData$`City Name`, reqData$`Parameter Name`,sep = " | ")) %>% addLegend(position='bottomright', colors = labelTitles,labels = labelTitles, title = 'Pollution data')
 m 
 
 
-m <- leaflet(reqData) %>% addTiles('http://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', 
-                              attribution='Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>') 
-m %>% setView(-95.71289,37.09024, zoom = 8)
-m %>% addCircles(lng = reqData$Longitude, lat = reqData$Latitude, popup=reqData$`Parameter Name`, weight = 3, radius=40, 
-                 color="#ffa500", stroke = TRUE, fillOpacity = 0.8)
-m
+
+
+#m <- leaflet(reqData) %>% addTiles('http://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', 
+                              #attribution='Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>') 
+#m %>% setView(-95.71289,37.09024, zoom = 8)
+#m %>% addCircles(lng = reqData$Longitude, lat = reqData$Latitude, popup=reqData$`Parameter Name`, weight = 3, radius=40, 
+                 #color="#ffa500", stroke = TRUE, fillOpacity = 0.8)
+#m
