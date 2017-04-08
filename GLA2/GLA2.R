@@ -58,13 +58,13 @@ library(leaflet)
 library(RColorBrewer)
 library(plyr)
 colorCount<-plyr::count(reqData$`Parameter Name`)
-colorCount
-nrow(colorCount)
+#colorCount
+#nrow(colorCount)
 labelTitles <- sample_n(tbl_df(reqData$`Parameter Name`),5)
-m<-leaflet() %>% addTiles() %>% setView(-72.690940, 41.651426, zoom = 8) %>% addCircles(lng=reqData$Longitude, lat=reqData$Latitude,radius = reqData$`Observation Count`,color = brewer.pal(12,"Set3"),opacity = reqData$`Observation Count`,fill = TRUE, fillColor = brewer.pal(12,"Set3"),popup=paste(reqData$`State Name`, reqData$`County Name`, reqData$`City Name`, reqData$`Parameter Name`,sep = " | ")) %>% addLegend(position='bottomright', colors = labelTitles,labels = labelTitles, title = 'Pollution data')
+m<-leaflet() %>% addTiles() %>% setView(-72.690940, 41.651426, zoom = 8) %>% addCircles(lng=reqData$Longitude, lat=reqData$Latitude,radius = reqData$`Observation Count`,color = palette(rainbow(nrow(colorCount))),opacity = reqData$`Observation Count`,fill = TRUE, fillColor = palette(rainbow(nrow(colorCount))),popup=paste(reqData$`State Name`, reqData$`County Name`, reqData$`City Name`, reqData$`Parameter Name`,sep = " | "))%>% highlightOptions(stroke = NULL, color = labelTitles, weight = 5, opacity = 0.75, fill = TRUE, fillColor = labelTitles, bringToFront = TRUE)
 m 
-
-
+#%>% addLegend(position='bottomright', colors = labelTitles,labels = labelTitles, title = 'Pollution data') 
+#palette(rainbow(nrow(colorCount)))
 
 
 #m <- leaflet(reqData) %>% addTiles('http://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', 
