@@ -108,13 +108,42 @@ genDataMap("/home/starship9/Desktop/SNU/Data Mining/CSD342_DataMining/GLA2/annua
                  #color="#ffa500", stroke = TRUE, fillOpacity = 0.8)
 #m
 
-library(plotly)
-l <- list(color = "rgba(255,255,255,1)", width = 1)
-g <- list(scope = 'usa')
-per_million_plot <- plot_ly(tbl_df(reqData$`Arithmetic Mean`), z = reqData$`Arithmetic Mean`, text = paste(reqData$`State Name`, reqData$`County Name`, reqData$`City Name`, reqData$`Parameter Name`,sep = " | "), locations = reqData$`State Name`, type = 'choropleth',
-                            locationmode = 'USA-states', color = reqData$`Arithmetic Mean`, colors = 'Purples',
-                            marker = list(line = l), colorbar = list(title = "Pollution choropleth", lenmode = "pixels",
-                                                                     titleside = "right", xpad = 0, ypad = 0)) %>%
-  layout(title = 'Pollution data for 2016', geo = g)
+#library(plotly)
+#l <- list(color = "rgba(255,255,255,1)", width = 1)
+#g <- list(scope = 'usa')
+#per_million_plot <- plot_ly(tbl_df(reqData$`Arithmetic Mean`), z = reqData$`Arithmetic Mean`, text = paste(reqData$`State Name`, reqData$`County Name`, reqData$`City Name`, reqData$`Parameter Name`,sep = " | "), locations = reqData$`State Name`, type = 'choropleth',
+#                            locationmode = 'USA-states', color = reqData$`Arithmetic Mean`, colors = 'Purples',
+#                            marker = list(line = l), colorbar = list(title = "Pollution choropleth", lenmode = "pixels",
+#                                                                     titleside = "right", xpad = 0, ypad = 0)) %>%
+#  layout(title = 'Pollution data for 2016', geo = g)
 
-per_million_plot
+#per_million_plot
+
+genPlotChoro<-function(x){
+  library(plotly)
+  annual_all_2016 <- read_csv(x)
+  library(dplyr) 
+  reqData<-select(annual_all_2016,`State Code`,`Year`,`Parameter Name`, `Observation Count`,`Arithmetic Mean`,`Completeness Indicator`,`Sample Duration` ,`State Name`, `County Name`, `City Name`,`Latitude`,`Longitude`,`Primary Exceedance Count`)%>%filter(`Completeness Indicator`!='N')  
+  reqData$hover<-with(reqData,paste(`State Name`,'<br>',`Parameter Name`, '<br>', `Primary Exceedance Count`, '<br>', `Year`, '<br>' ))
+  
+  l<-list(color = toRGB("white"), width = 2)    
+
+  g<-list(scope = 'usa', projection = list(type = 'albers usa'),showlakes = TRUE, lakecolor = toRGB('white'))
+  
+  #p<-plot_geo(reqData, locationmode = 'USA-states') %>% add_trace(z = ~`Primary Exceedance Count`, text = ~hover, locations = ~`State Code`,color = ~'Primary Exceedance Count',colors = 'Purples') %>% colorbar(title = "Pollution data") %>% layout(title = '2016 Air pollution data', geo = g)
+  p <- plot_geo(reqData, locationmode = 'USA-states') %>%
+    add_trace(
+      z = reqData$`Primary Exceedance Count`, text = reqData$hover, locations = reqData$`State Code`,
+      color = reqData$`Primary Exceedance Count`, colors = 'Purples'
+    ) %>%
+    colorbar(title = "Millions USD") %>%
+    layout(
+      title = 'Test choropleth',
+      geo = g
+    )
+  
+  
+  p
+}
+
+genPlotChoro("/home/starship9/Desktop/SNU/Data Mining/CSD342_DataMining/GLA2/annual_all_1995.csv")
