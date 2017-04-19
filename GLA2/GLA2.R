@@ -241,7 +241,6 @@ admin1_choropleth("united states of america",testDF,title="test choropleth", leg
 
 
 library(sp)
-library(rgeos)
 library(rgdal)
 library(maptools)
 library(dplyr)
@@ -255,7 +254,7 @@ library(scales)
 dat <- read.csv('annual_all_2016.csv', stringsAsFactors = FALSE)
 # Colnames tolower
 names(dat) <- tolower(names(dat))
-county_dat <- subset(dat, parameter.code == "88101", select = c("state.code", "county.code", "county.name", "parameter.name", "arithmetic.mean"))
+county_dat <- subset(dat, parameter.code == "88503", select = c("state.code", "county.code", "county.name", "parameter.name", "arithmetic.mean"))
 
 # Format the state and county codes
 county_dat$county.code <- formatC(county_dat$county.code, width = 3, format = "d", flag = "0")
@@ -295,7 +294,7 @@ popup_dat <- paste0("<strong>County: </strong>",
 dat2000 <- read.csv('annual_all_2000.csv', stringsAsFactors = FALSE)
 # Colnames tolower
 names(dat2000) <- tolower(names(dat2000))
-county_dat2000 <- subset(dat2000, parameter.code == "88101", select = c("state.code", "county.code", "county.name", "parameter.name", "arithmetic.mean"))
+county_dat2000 <- subset(dat2000, parameter.code == "88503", select = c("state.code", "county.code", "county.name", "parameter.name", "arithmetic.mean"))
 
 # Format the state and county codes
 county_dat2000$county.code <- formatC(county_dat2000$county.code, width = 3, format = "d", flag = "0")
@@ -334,7 +333,7 @@ popup_dat2000 <- paste0("<strong>County: </strong>",
 dat2010 <- read.csv('annual_all_2010.csv', stringsAsFactors = FALSE)
 # Colnames tolower
 names(dat2010) <- tolower(names(dat2010))
-county_dat2010 <- subset(dat2010, parameter.code == "88101", select = c("state.code", "county.code", "county.name", "parameter.name", "arithmetic.mean"))
+county_dat2010 <- subset(dat2010, parameter.code == "88503", select = c("state.code", "county.code", "county.name", "parameter.name", "arithmetic.mean"))
 
 # Format the state and county codes
 county_dat2010$county.code <- formatC(county_dat2010$county.code, width = 3, format = "d", flag = "0")
@@ -373,7 +372,7 @@ popup_dat2010 <- paste0("<strong>County: </strong>",
 dat2005 <- read.csv('annual_all_2005.csv', stringsAsFactors = FALSE)
 # Colnames tolower
 names(dat2005) <- tolower(names(dat2005))
-county_dat2005 <- subset(dat2005, parameter.code == "88101", select = c("state.code", "county.code", "county.name", "parameter.name", "arithmetic.mean"))
+county_dat2005 <- subset(dat2005, parameter.code == "88503", select = c("state.code", "county.code", "county.name", "parameter.name", "arithmetic.mean"))
 
 # Format the state and county codes
 county_dat2005$county.code <- formatC(county_dat2005$county.code, width = 3, format = "d", flag = "0")
@@ -409,7 +408,8 @@ popup_dat2005 <- paste0("<strong>County: </strong>",
 
 #END PARSE
 
-pal <- colorQuantile("inferno", NULL, n = 9)
+#END DATA
+pal <- colorQuantile("PuBu", NULL, n = 9)
 # Render final map in leaflet.
 leaflet() %>% addTiles() %>%
   addPolygons(data = leafmap,fillColor = ~pal(airqlty), 
