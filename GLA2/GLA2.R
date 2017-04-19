@@ -26,7 +26,8 @@ library(ggplot2)
 g<-ggplot(sample_n(reqData,20),aes(x = `Parameter Name`, y = `Observation Count`, color = `Parameter Name`)) + geom_point()
 g
 
-ggplot(sample_n( reqData, 20),aes(x = `State Name`,color = `State Name`,fill = `State Name`)) + geom_bar()
+newG<-ggplot(sample_n( reqData, 20),aes(x = `State Name`,color = `State Name`,fill = `State Name`)) + geom_bar()
+return(newG)
 }
 
 genGraphBar("/home/starship9/Desktop/SNU/Data Mining/CSD342_DataMining/GLA2/annual_all_2016.csv")
@@ -90,7 +91,8 @@ colorCount<-plyr::count(reqData$`Parameter Name`)
 #nrow(colorCount)
 labelTitles <- sample_n(tbl_df(reqData$`Parameter Name`),5)
 m<-leaflet() %>% addTiles() %>% setView(-72.690940, 41.651426, zoom = 8) %>% addCircles(lng=reqData$Longitude, lat=reqData$Latitude,radius = reqData$`Observation Count`,color = palette(rainbow(nrow(colorCount))),opacity = reqData$`Arithmetic Mean`,fill = TRUE, fillColor = palette(rainbow(nrow(colorCount))),popup=paste(reqData$`State Name`, reqData$`County Name`, reqData$`City Name`, reqData$`Parameter Name`,sep = " | "))%>% highlightOptions(stroke = NULL, color = labelTitles, weight = 5, opacity = 0.75, fill = TRUE, fillColor = labelTitles, bringToFront = TRUE)
-m 
+
+return (m)
 }
 genDataMap("/home/starship9/Desktop/SNU/Data Mining/CSD342_DataMining/GLA2/annual_all_1995.csv")
 genDataMap("/home/starship9/Desktop/SNU/Data Mining/CSD342_DataMining/GLA2/annual_all_2000.csv")
@@ -133,17 +135,90 @@ genPlotChoro<-function(x){
   #p<-plot_geo(reqData, locationmode = 'USA-states') %>% add_trace(z = ~`Primary Exceedance Count`, text = ~hover, locations = ~`State Code`,color = ~'Primary Exceedance Count',colors = 'Purples') %>% colorbar(title = "Pollution data") %>% layout(title = '2016 Air pollution data', geo = g)
   p <- plot_geo(reqData, locationmode = 'USA-states') %>%
     add_trace(
-      z = reqData$`Primary Exceedance Count`, text = reqData$hover, locations = reqData$`State Code`,
-      color = reqData$`Primary Exceedance Count`, colors = 'Purples'
+      z = ~`Primary Exceedance Count`, text = ~hover, locations = ~`State Code`,
+      color = ~`Primary Exceedance Count`, colors = 'Purples'
     ) %>%
-    colorbar(title = "Millions USD") %>%
+    colorbar(title = "Primary Exceedance Count") %>%
     layout(
       title = 'Test choropleth',
       geo = g
     )
   
   
-  p
+  return (p)
 }
 
-genPlotChoro("/home/starship9/Desktop/SNU/Data Mining/CSD342_DataMining/GLA2/annual_all_1995.csv")
+genPlotChoro("/home/starship9/Desktop/SNU/Data Mining/CSD342_DataMining/GLA2/annual_all_2016.csv")
+
+
+library(plotly)
+df <- read.csv("/home/starship9/Desktop/SNU/Data Mining/CSD342_DataMining/GLA2/annual_all_1995.csv")
+df$hover <- with(df, paste(State.Name, '<br>', "Exceedance count", Primary.Exceedance.Count, "Parameter", Parameter.Name, "<br>",
+                           "County name", County.Name, "City", City.Name,
+                           "<br>", "City", City.Name, "Parameter Code", Parameter.Code))
+# give state boundaries a white border
+l <- list(color = toRGB("white"), width = 2)
+# specify some map projection/options
+g <- list(
+  scope = 'usa',
+  projection = list(type = 'albers usa'),
+  showlakes = TRUE,
+  lakecolor = toRGB('white')
+)
+
+p <- plot_geo(df, locationmode = 'ANSI | USA-States') %>%
+  add_trace(
+    z = ~Primary.Exceedance.Count, text = ~hover, locations = ~State.Code,
+    color = ~Primary.Exceedance.Count, colors = 'Purples'
+  ) %>%
+  colorbar(title = "Primary Exceedance Count") %>%
+  layout(
+    title = 'Test Choropleth',
+    geo = g
+  )
+#chart_link = plotly_POST(p, filename="choropleth/ag")
+#chart_link
+p
+
+
+
+df <- read.csv("https://raw.githubusercontent.com/plotly/datasets/master/2011_us_ag_exports.csv")
+df$hover <- with(df, paste(state, '<br>', "Beef", beef, "Dairy", dairy, "<br>",
+                           "Fruits", total.fruits, "Veggies", total.veggies,
+                           "<br>", "Wheat", wheat, "Corn", corn))
+# give state boundaries a white border
+l <- list(color = toRGB("white"), width = 2)
+# specify some map projection/options
+g <- list(
+  scope = 'usa',
+  projection = list(type = 'albers usa'),
+  showlakes = TRUE,
+  lakecolor = toRGB('white')
+)
+
+p <- plot_geo(df, locationmode = 'USA-states') %>%
+  add_trace(
+    z = ~total.exports, text = ~hover, locations = ~code,
+    color = ~total.exports, colors = 'Purples'
+  ) %>%
+  colorbar(title = "Millions USD") %>%
+  layout(
+    title = '2011 US Agriculture Exports by State<br>(Hover for breakdown)',
+    geo = g
+  )
+
+p
+
+
+library(choroplethr)
+library(choroplethrAdmin1)
+
+df <- read.csv("/home/starship9/Desktop/SNU/Data Mining/CSD342_DataMining/GLA2/annual_all_1995.csv")
+head(df)
+library(dplyr)
+df$region<-tolower(df$State.Name)
+df$value<-df$Primary.Exceedance.Count
+
+testDF<-select(df,region,value) %>% filter(!is.na(value),value>0)
+
+admin1_choropleth("united states of america",testDF,title="test choropleth", legend = "pollution data",buckets = 1,zoom=NULL)
