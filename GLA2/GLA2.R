@@ -331,6 +331,45 @@ popup_dat2000 <- paste0("<strong>County: </strong>",
 #END PARSING
 
 #PARSE 2005
+dat2010 <- read.csv('annual_all_2010.csv', stringsAsFactors = FALSE)
+# Colnames tolower
+names(dat2010) <- tolower(names(dat2010))
+county_dat2010 <- subset(dat2010, parameter.code == "88101", select = c("state.code", "county.code", "county.name", "parameter.name", "arithmetic.mean"))
+
+# Format the state and county codes
+county_dat2010$county.code <- formatC(county_dat2010$county.code, width = 3, format = "d", flag = "0")
+county_dat2010$state.code <- formatC(county_dat2010$state.code, width = 2, format = "d", flag = "0")
+#merge them in a new column
+county_dat2010$fsid<-paste(county_dat2010$state.code, county_dat2010$county.code, sep="")
+
+#take the mean of ozone for each county
+meanval2010 <- aggregate(formula=county_dat2010$arithmetic.mean~county_dat2010$fsid, data = county_dat2010, FUN=mean)
+
+# Rename columns to make for a clean df merge later.
+colnames(meanval2010) <- c("GEOID", "airqlty2010")
+### End data prep
+
+us.map <- readOGR(dsn = ".", layer = "cb_2013_us_county_20m", stringsAsFactors = FALSE)
+
+# Remove Alaska(2), Hawaii(15), Puerto Rico (72), Guam (66), Virgin Islands (78), American Samoa (60)
+#  Mariana Islands (69), Micronesia (64), Marshall Islands (68), Palau (70), Minor Islands (74)
+us.map <- us.map[!us.map$STATEFP %in% c("02", "15", "72", "66", "78", "60", "69",
+                                        "64", "68", "70", "74"),]
+# Make sure other outling islands are removed.
+us.map <- us.map[!us.map$STATEFP %in% c("81", "84", "86", "87", "89", "71", "76",
+                                        "95", "79"),]
+# Merge spatial df with downloade ddata.
+leafmap2010 <- merge(us.map, meanval2010, by=c("GEOID"))
+
+# Format popup data for leaflet map.
+popup_dat2010 <- paste0("<strong>County: </strong>", 
+                        leafmap2010$NAME, 
+                        "<br><strong>Value: </strong>", 
+                        leafmap2010$airqlty2010)
+
+#END PARSE
+
+#BEGIN PARSE
 dat2005 <- read.csv('annual_all_2005.csv', stringsAsFactors = FALSE)
 # Colnames tolower
 names(dat2005) <- tolower(names(dat2005))
@@ -367,6 +406,7 @@ popup_dat2005 <- paste0("<strong>County: </strong>",
                         "<br><strong>Value: </strong>", 
                         leafmap2005$airqlty2005)
 
+
 #END PARSE
 
 pal <- colorQuantile("inferno", NULL, n = 9)
@@ -377,19 +417,24 @@ leaflet() %>% addTiles() %>%
               color = "#BDBDC3", 
               weight = 1,
               group = "2016",
-              popup = popup_dat) %>% addPolygons(data = leafmap2005,fillColor = ~pal(airqlty2005), 
+              popup = popup_dat) %>% addPolygons(data = leafmap2010,fillColor = ~pal(airqlty2010), 
                                                  fillOpacity = 0.8, 
                                                  color = "#BDBDC3", 
                                                  weight = 2,
+                                                 group = "2010",
+                                                 popup = popup_dat2010)%>% addPolygons(data = leafmap2005,fillColor = ~pal(airqlty2005), 
+                                                 fillOpacity = 0.8, 
+                                                 color = "#BDBDC3", 
+                                                 weight = 3,
                                                  group = "2005",
                                                  popup = popup_dat2005)%>% 
                                                   addPolygons(data = leafmap2000,fillColor = ~pal(airqlty2000), 
                                                  fillOpacity = 0.8, 
                                                  color = "#BDBDC3", 
-                                                 weight = 3,
+                                                 weight = 4,
                                                  group = "2000",
                                                  popup = popup_dat2000) %>% addLayersControl(
-                                                   baseGroups = c("2016","2005", ## group 1
+                                                   baseGroups = c("2016","2010","2005", ## group 1
                                                                   "2000" ## group 2
                                                    ),
                                                    options = layersControlOptions(collapsed = FALSE)) ## we want our control to be seen right away
