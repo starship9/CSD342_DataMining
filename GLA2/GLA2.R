@@ -79,8 +79,11 @@ genDataMap<-function(x) {
   head(annual_all_2016)
   names(annual_all_2016)
   library(dplyr)
+  library(rgdal)
   #getting required data parameters, including only those that have been completed
-  reqData<-select(annual_all_2016,`Year`,`Parameter Name`, `Observation Count`,`Arithmetic Mean`,`Completeness Indicator`,`Sample Duration` ,`State Name`, `County Name`, `City Name`,`Latitude`,`Longitude`,`Primary Exceedance Count`)%>%filter(`Completeness Indicator`!='N')
+  shapeFile<-readOGR(dsn=".",layer="cb_2013_us_county_20m",stringsAsFactors = FALSE)
+  reqData<-select(annual_all_2016,`Year`,`Parameter Name`, `Observation Count`,`Arithmetic Mean`,`Completeness Indicator`,`State Code`,`County Code`,`Sample Duration` ,`State Name`, `County Name`, `City Name`,`Latitude`,`Longitude`,`Primary Exceedance Count`)%>%filter(`Completeness Indicator`!='N')
+  
   head(reqData)
   
   library(leaflet)
@@ -90,8 +93,16 @@ colorCount<-plyr::count(reqData$`Parameter Name`)
 #colorCount
 #nrow(colorCount)
 labelTitles <- sample_n(tbl_df(reqData$`Parameter Name`),5)
-m<-leaflet() %>% addTiles() %>% setView(-72.690940, 41.651426, zoom = 8) %>% addCircles(lng=reqData$Longitude, lat=reqData$Latitude,radius = reqData$`Observation Count`,color = palette(rainbow(nrow(colorCount))),opacity = reqData$`Arithmetic Mean`,fill = TRUE, fillColor = palette(rainbow(nrow(colorCount))),popup=paste(reqData$`State Name`, reqData$`County Name`, reqData$`City Name`, reqData$`Parameter Name`,sep = " | "))%>% highlightOptions(stroke = NULL, color = labelTitles, weight = 5, opacity = 0.75, fill = TRUE, fillColor = labelTitles, bringToFront = TRUE)
-
+reqData$`State Code`<-format(reqData$`State Code`,width = 2, format = "d", flag="0")
+reqData$`County Code`<-format(reqData$`County Code`,width = 3, format = "d", flag="0")
+reqData$geoID<-paste(reqData$`State Code`,reqData$`County Code`,sep="")
+#m<-merge(shapeFile,reqData$`Primary Exceedance Count`,)
+exceedCount<-aggregate(formula=reqData$`Primary Exceedance Count`~reqData$geoID,data = reqData,FUN = mean)
+colnames(exceedCount)<-c("GEOID","exceed")
+mergeStuff<-merge(shapeFile,exceedCount,by=c("GEOID"))
+pal<-colorQuantile("Greens",NULL,n=9)
+#m<-leaflet(data=mergeStuff) %>% addTiles() %>% addPolygons(fillColor=~pal(exceedCount),fillOpacity=0.8,color="#BDBDC3",weight=1)%>% setView(-72.690940, 41.651426, zoom = 8) %>% addCircles(lng=reqData$Longitude, lat=reqData$Latitude,radius = reqData$`Observation Count`,color = palette(rainbow(nrow(colorCount))),opacity = reqData$`Arithmetic Mean`,fill = TRUE, fillColor = palette(rainbow(nrow(colorCount))),popup=paste(reqData$`State Name`, reqData$`County Name`, reqData$`City Name`, reqData$`Parameter Name`,sep = " | "))%>% highlightOptions(stroke = NULL, color = labelTitles, weight = 5, opacity = 0.75, fill = TRUE, fillColor = labelTitles, bringToFront = TRUE)
+m<-leaflet(data=mergeStuff) %>% addTiles() %>% addPolygons(fillColor=~pal(exceedCount),fillOpacity=0.8,color="#BDBDC3",weight=1)
 return (m)
 }
 genDataMap("/home/starship9/Desktop/SNU/Data Mining/CSD342_DataMining/GLA2/annual_all_1995.csv")
@@ -209,9 +220,10 @@ p <- plot_geo(df, locationmode = 'USA-states') %>%
 
 p
 
-
+#testing choroplethr
 library(choroplethr)
 library(choroplethrAdmin1)
+
 
 df <- read.csv("/home/starship9/Desktop/SNU/Data Mining/CSD342_DataMining/GLA2/annual_all_1995.csv")
 head(df)
@@ -220,5 +232,68 @@ df$region<-tolower(df$State.Name)
 df$value<-df$Primary.Exceedance.Count
 
 testDF<-select(df,region,value) %>% filter(!is.na(value),value>0)
-
+testDF$region<-unique(testDF$region)
 admin1_choropleth("united states of america",testDF,title="test choropleth", legend = "pollution data",buckets = 1,zoom=NULL)
+
+
+
+library(sp)
+library(rgeos)
+library(rgdal)
+library(maptools)
+library(dplyr)
+library(leaflet)
+library(scales)
+
+### Begin data prep
+genChoro<-function(x){
+dat <- read.csv(x, stringsAsFactors = FALSE)
+# Colnames tolower
+names(dat) <- tolower(names(dat))
+county_dat <- subset(dat, parameter.code == "88101", select = c("state.code", "county.code", "county.name", "parameter.name", "arithmetic.mean"))
+
+# Format the state and county codes
+county_dat$county.code <- formatC(county_dat$county.code, width = 3, format = "d", flag = "0")
+county_dat$state.code <- formatC(county_dat$state.code, width = 2, format = "d", flag = "0")
+#merge them in a new column
+county_dat$fsid<-paste(county_dat$state.code, county_dat$county.code, sep="")
+
+#take the mean of ozone for each county
+meanval <- aggregate(formula=county_dat$arithmetic.mean~county_dat$fsid, data = county_dat, FUN=mean)
+
+# Rename columns to make for a clean df merge later.
+colnames(meanval) <- c("GEOID", "airqlty")
+### End data prep
+
+us.map <- readOGR(dsn = ".", layer = "cb_2013_us_county_20m", stringsAsFactors = FALSE)
+
+# Remove Alaska(2), Hawaii(15), Puerto Rico (72), Guam (66), Virgin Islands (78), American Samoa (60)
+#  Mariana Islands (69), Micronesia (64), Marshall Islands (68), Palau (70), Minor Islands (74)
+us.map <- us.map[!us.map$STATEFP %in% c("02", "15", "72", "66", "78", "60", "69",
+                                        "64", "68", "70", "74"),]
+# Make sure other outling islands are removed.
+us.map <- us.map[!us.map$STATEFP %in% c("81", "84", "86", "87", "89", "71", "76",
+                                        "95", "79"),]
+# Merge spatial df with downloade ddata.
+leafmap <- merge(us.map, meanval, by=c("GEOID"))
+
+# Format popup data for leaflet map.
+popup_dat <- paste0("<strong>County: </strong>", 
+                    leafmap$NAME, 
+                    "<br><strong>Value: </strong>", 
+                    leafmap$airqlty)
+
+pal <- colorQuantile("Greens", NULL, n = 9)
+# Render final map in leaflet.
+leaflet(data = leafmap) %>% addTiles() %>%
+  addPolygons(fillColor = ~pal(airqlty), 
+              fillOpacity = 0.8, 
+              color = "#BDBDC3", 
+              weight = 1,
+              popup = popup_dat)
+
+}
+
+genChoro("annual_all_2016.csv")
+genChoro("annual_all_1995.csv")
+genChoro("annual_all_2005.csv")
