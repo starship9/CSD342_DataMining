@@ -465,13 +465,52 @@ sum2010<-sum(testDF2010$arithmetic.mean)
 
 paramSum<-c(sum2000,sum2005,sum2010,sum2016)
 
-dataFrame<-data.frame(paramSum,years,arithSum)
+
+testDFozone<-subset(dat,parameter.code=="42601",select = ("arithmetic.mean"))
+#testDF
+sum2016ozone<-sum(testDFozone$arithmetic.mean)
+testDF2000ozone<-subset(dat2000,parameter.code=="42601",select = ("arithmetic.mean"))
+#testDF
+sum2000ozone<-sum(testDF2000$arithmetic.mean)
+testDF2005ozone<-subset(dat2005,parameter.code=="42601",select = ("arithmetic.mean"))
+#testDF
+sum2005ozone<-sum(testDF2005ozone$arithmetic.mean)
+testDF2010ozone<-subset(dat2010,parameter.code=="42601",select = ("arithmetic.mean"))
+#testDF
+sum2010ozone<-sum(testDF2010ozone$arithmetic.mean)
+
+testDFco<-subset(dat,parameter.code=="42101",select = ("arithmetic.mean"))
+#testDF
+sum2016co<-sum(testDFco$arithmetic.mean)
+testDF2000co<-subset(dat2000,parameter.code=="42101",select = ("arithmetic.mean"))
+#testDF
+sum2000co<-sum(testDF2000co$arithmetic.mean)
+testDF2005co<-subset(dat2005,parameter.code=="42101",select = ("arithmetic.mean"))
+#testDF
+sum2005co<-sum(testDF2005co$arithmetic.mean)
+testDF2010co<-subset(dat2010,parameter.code=="42101",select = ("arithmetic.mean"))
+#testDF
+sum2010co<-sum(testDF2010co$arithmetic.mean)
+
+
+
+coSum<-c(sum2000co,sum2005co,sum2010co,sum2016co)
+paramSum<-c(sum2000,sum2005,sum2010,sum2016)
+ozoneSum<-c(sum2000ozone,sum2005ozone,sum2010ozone,sum2016ozone)
+
+
+
+dataFrame<-data.frame(paramSum,years,arithSum, ozoneSum,coSum)
 #genChoro("annual_all_2016.csv")
 library(plotly)
-lineP<-plot_ly(dataFrame,x = ~years, y = ~paramSum, name = 'particulate matter',type = 'scatter', mode = 'lines') %>% add_trace(y = ~arithSum,name = 'total Pollution',mode='line')
+lineP<-plot_ly(dataFrame,x = ~years, y = ~paramSum, name = 'comatter',type = 'scatter', mode = 'lines') %>% add_trace(y = ~coSum,name = 'carbon monoxide quantity',mode='line') %>% add_trace(y = ~ozoneSum,name='ozone quantity',mode='line')
 lineP
 
-
+p <- plot_ly(dataFrame, labels = ~rownames(dataFrame), values = ~coSum, type = 'pie') %>%
+  layout(title = 'Yearly Carbon monoxide distribution',
+         xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+         yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+p
 #genChoro("annual_all_1995.csv")
 #genChoro("annual_all_2005.csv")
 #genChoro("annual_all_2010.csv")
