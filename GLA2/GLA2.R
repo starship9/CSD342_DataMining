@@ -254,7 +254,7 @@ library(scales)
 dat <- read.csv('annual_all_2016.csv', stringsAsFactors = FALSE)
 # Colnames tolower
 names(dat) <- tolower(names(dat))
-county_dat <- subset(dat, parameter.code == "88503", select = c("state.code", "county.code", "county.name", "parameter.name", "arithmetic.mean"))
+county_dat <- subset(dat, parameter.code == "88101", select = c("state.code", "county.code", "county.name", "parameter.name", "arithmetic.mean"))
 
 # Format the state and county codes
 county_dat$county.code <- formatC(county_dat$county.code, width = 3, format = "d", flag = "0")
@@ -294,7 +294,7 @@ popup_dat <- paste0("<strong>County: </strong>",
 dat2000 <- read.csv('annual_all_2000.csv', stringsAsFactors = FALSE)
 # Colnames tolower
 names(dat2000) <- tolower(names(dat2000))
-county_dat2000 <- subset(dat2000, parameter.code == "88503", select = c("state.code", "county.code", "county.name", "parameter.name", "arithmetic.mean"))
+county_dat2000 <- subset(dat2000, parameter.code == "88101", select = c("state.code", "county.code", "county.name", "parameter.name", "arithmetic.mean"))
 
 # Format the state and county codes
 county_dat2000$county.code <- formatC(county_dat2000$county.code, width = 3, format = "d", flag = "0")
@@ -333,7 +333,7 @@ popup_dat2000 <- paste0("<strong>County: </strong>",
 dat2010 <- read.csv('annual_all_2010.csv', stringsAsFactors = FALSE)
 # Colnames tolower
 names(dat2010) <- tolower(names(dat2010))
-county_dat2010 <- subset(dat2010, parameter.code == "88503", select = c("state.code", "county.code", "county.name", "parameter.name", "arithmetic.mean"))
+county_dat2010 <- subset(dat2010, parameter.code == "88101", select = c("state.code", "county.code", "county.name", "parameter.name", "arithmetic.mean"))
 
 # Format the state and county codes
 county_dat2010$county.code <- formatC(county_dat2010$county.code, width = 3, format = "d", flag = "0")
@@ -372,7 +372,7 @@ popup_dat2010 <- paste0("<strong>County: </strong>",
 dat2005 <- read.csv('annual_all_2005.csv', stringsAsFactors = FALSE)
 # Colnames tolower
 names(dat2005) <- tolower(names(dat2005))
-county_dat2005 <- subset(dat2005, parameter.code == "88503", select = c("state.code", "county.code", "county.name", "parameter.name", "arithmetic.mean"))
+county_dat2005 <- subset(dat2005, parameter.code == "88101", select = c("state.code", "county.code", "county.name", "parameter.name", "arithmetic.mean"))
 
 # Format the state and county codes
 county_dat2005$county.code <- formatC(county_dat2005$county.code, width = 3, format = "d", flag = "0")
@@ -439,10 +439,39 @@ leaflet() %>% addTiles() %>%
                                                    ),
                                                    options = layersControlOptions(collapsed = FALSE)) ## we want our control to be seen right away
 
+library(dplyr)
+
+s2016<-sum(dat$arithmetic.mean)
+s2000<-sum(dat2000$arithmetic.mean)
+s2010<-sum(dat2010$arithmetic.mean)
+s2005<-sum(dat2005$arithmetic.mean)
+
+arithSum<-c(s2000,s2005,s2010,s2016)
+years<-c("2000","2005","2010","2016")
 
 
+testDF<-subset(dat,parameter.code=="88101",select = ("arithmetic.mean"))
+#testDF
+sum2016<-sum(testDF$arithmetic.mean)
+testDF2000<-subset(dat2000,parameter.code=="88101",select = ("arithmetic.mean"))
+#testDF
+sum2000<-sum(testDF2000$arithmetic.mean)
+testDF2005<-subset(dat2005,parameter.code=="88101",select = ("arithmetic.mean"))
+#testDF
+sum2005<-sum(testDF2005$arithmetic.mean)
+testDF2010<-subset(dat2010,parameter.code=="88101",select = ("arithmetic.mean"))
+#testDF
+sum2010<-sum(testDF2010$arithmetic.mean)
 
+paramSum<-c(sum2000,sum2005,sum2010,sum2016)
+
+dataFrame<-data.frame(paramSum,years)
 #genChoro("annual_all_2016.csv")
+library(plotly)
+lineP<-plot_ly(dataFrame,x = ~years, y = ~paramSum, type = 'scatter', mode = 'lines')
+lineP
+
+
 #genChoro("annual_all_1995.csv")
 #genChoro("annual_all_2005.csv")
 #genChoro("annual_all_2010.csv")
