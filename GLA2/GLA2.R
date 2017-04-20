@@ -337,46 +337,46 @@ years<-c("2000","2005","2010","2016")
 #getting total particulate matter
 testDF<-subset(dat,parameter.code=="88101",select = ("arithmetic.mean"))
 #testDF
-sum2016<-sum(testDF$arithmetic.mean)
+sum2016<-mean(testDF$arithmetic.mean)
 testDF2000<-subset(dat2000,parameter.code=="88101",select = ("arithmetic.mean"))
 #testDF
-sum2000<-sum(testDF2000$arithmetic.mean)
+sum2000<-mean(testDF2000$arithmetic.mean)
 testDF2005<-subset(dat2005,parameter.code=="88101",select = ("arithmetic.mean"))
 #testDF
-sum2005<-sum(testDF2005$arithmetic.mean)
+sum2005<-mean(testDF2005$arithmetic.mean)
 testDF2010<-subset(dat2010,parameter.code=="88101",select = ("arithmetic.mean"))
 #testDF
-sum2010<-sum(testDF2010$arithmetic.mean)
+sum2010<-mean(testDF2010$arithmetic.mean)
 
 paramSum<-c(sum2000,sum2005,sum2010,sum2016)
 
 #getting ozone data
 testDFozone<-subset(dat,parameter.code=="42601",select = ("arithmetic.mean"))
 #testDF
-sum2016ozone<-sum(testDFozone$arithmetic.mean)
+sum2016ozone<-mean(testDFozone$arithmetic.mean)
 testDF2000ozone<-subset(dat2000,parameter.code=="42601",select = ("arithmetic.mean"))
 #testDF
-sum2000ozone<-sum(testDF2000$arithmetic.mean)
+sum2000ozone<-mean(testDF2000$arithmetic.mean)
 testDF2005ozone<-subset(dat2005,parameter.code=="42601",select = ("arithmetic.mean"))
 #testDF
-sum2005ozone<-sum(testDF2005ozone$arithmetic.mean)
+sum2005ozone<-mean(testDF2005ozone$arithmetic.mean)
 testDF2010ozone<-subset(dat2010,parameter.code=="42601",select = ("arithmetic.mean"))
 #testDF
-sum2010ozone<-sum(testDF2010ozone$arithmetic.mean)
+sum2010ozone<-mean(testDF2010ozone$arithmetic.mean)
 
 #CO!
 testDFco<-subset(dat,parameter.code=="42101",select = ("arithmetic.mean"))
 #testDF
-sum2016co<-sum(testDFco$arithmetic.mean)
+sum2016co<-mean(testDFco$arithmetic.mean)
 testDF2000co<-subset(dat2000,parameter.code=="42101",select = ("arithmetic.mean"))
 #testDF
-sum2000co<-sum(testDF2000co$arithmetic.mean)
+sum2000co<-mean(testDF2000co$arithmetic.mean)
 testDF2005co<-subset(dat2005,parameter.code=="42101",select = ("arithmetic.mean"))
 #testDF
-sum2005co<-sum(testDF2005co$arithmetic.mean)
+sum2005co<-mean(testDF2005co$arithmetic.mean)
 testDF2010co<-subset(dat2010,parameter.code=="42101",select = ("arithmetic.mean"))
 #testDF
-sum2010co<-sum(testDF2010co$arithmetic.mean)
+sum2010co<-mean(testDF2010co$arithmetic.mean)
 
 
 
@@ -389,7 +389,7 @@ ozoneSum<-c(sum2000ozone,sum2005ozone,sum2010ozone,sum2016ozone)
 dataFrame<-data.frame(paramSum,years,arithSum, ozoneSum,coSum)
 #genChoro("annual_all_2016.csv")
 library(plotly)
-lineP<-plot_ly(dataFrame,x = ~years, y = ~paramSum, name = 'comatter',type = 'scatter', mode = 'lines') %>% add_trace(y = ~coSum,name = 'carbon monoxide quantity',mode='line') %>% add_trace(y = ~ozoneSum,name='ozone quantity',mode='line')
+lineP<-plot_ly(dataFrame,x = ~years, y = ~paramSum, name = 'particulate matter count',type = 'scatter', mode = 'lines') %>% add_trace(y = ~coSum,name = 'carbon monoxide quantity',mode='line') %>% add_trace(y = ~ozoneSum,name='ozone quantity',mode='line')
 lineP
 
 p <- plot_ly(dataFrame, labels = ~rownames(dataFrame), values = ~coSum, type = 'pie') %>%
