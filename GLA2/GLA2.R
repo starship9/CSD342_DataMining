@@ -8,6 +8,8 @@
 
 library(readr)
 library(magrittr)
+
+#function for generating yearly bar graphs
 genGraphBar<-function(x) {
 annual_all_2016 <- read_csv(x)
 
@@ -26,13 +28,14 @@ library(ggplot2)
 g<-ggplot(sample_n(reqData,20),aes(x = `Parameter Name`, y = `Observation Count`, color = `Parameter Name`)) + geom_point()
 g
 
+#actual graphing
 newG<-ggplot(sample_n( reqData, 20),aes(x = `State Name`,color = `State Name`,fill = `State Name`)) + geom_bar()
 
 library(plotly)
 ggplotly(newG)
 return(newG)
 }
-
+#loading the function with different .csv files
 genGraphBar("/home/starship9/Desktop/SNU/Data Mining/CSD342_DataMining/GLA2/annual_all_2016.csv")
 genGraphBar("/home/starship9/Desktop/SNU/Data Mining/CSD342_DataMining/GLA2/annual_all_1995.csv")
 genGraphBar("/home/starship9/Desktop/SNU/Data Mining/CSD342_DataMining/GLA2/annual_all_2000.csv")
@@ -75,6 +78,7 @@ names(reqData)
 #}
 #sampleData
 
+#plotting the pollution across the states
 genDataMap<-function(x) {
 
   annual_all_2016 <- read_csv(x)
@@ -89,7 +93,7 @@ genDataMap<-function(x) {
   
   head(reqData)
   
-  library(leaflet)
+library(leaflet)
 library(RColorBrewer)
 library(plyr)
 colorCount<-plyr::count(reqData$`Parameter Name`)
@@ -104,142 +108,19 @@ exceedCount<-aggregate(formula=reqData$`Primary Exceedance Count`~reqData$geoID,
 colnames(exceedCount)<-c("GEOID","exceed")
 mergeStuff<-merge(shapeFile,exceedCount,by=c("GEOID"))
 pal<-colorQuantile("Greens",NULL,n=9)
-#m<-leaflet(data=mergeStuff) %>% addTiles() %>% addPolygons(fillColor=~pal(exceedCount),fillOpacity=0.8,color="#BDBDC3",weight=1)%>% setView(-72.690940, 41.651426, zoom = 8) %>% addCircles(lng=reqData$Longitude, lat=reqData$Latitude,radius = reqData$`Observation Count`,color = palette(rainbow(nrow(colorCount))),opacity = reqData$`Arithmetic Mean`,fill = TRUE, fillColor = palette(rainbow(nrow(colorCount))),popup=paste(reqData$`State Name`, reqData$`County Name`, reqData$`City Name`, reqData$`Parameter Name`,sep = " | "))%>% highlightOptions(stroke = NULL, color = labelTitles, weight = 5, opacity = 0.75, fill = TRUE, fillColor = labelTitles, bringToFront = TRUE)
-m<-leaflet(data=mergeStuff) %>% addTiles() %>% addPolygons(fillColor=~pal(exceedCount),fillOpacity=0.8,color="#BDBDC3",weight=1)
+m<-leaflet() %>% addTiles() %>% setView(-72.690940, 41.651426, zoom = 8) %>% addCircles(lng=reqData$Longitude, lat=reqData$Latitude,radius = reqData$`Observation Count`,color = colorQuantile("plasma", NULL, n = 9),opacity = reqData$`Arithmetic Mean`,fill = TRUE, fillColor = colorQuantile("plasma", NULL, n = 9),popup=paste(reqData$`State Name`, reqData$`County Name`, reqData$`City Name`, reqData$`Parameter Name`,sep = " | "))%>% highlightOptions(stroke = NULL, color = labelTitles, weight = 5, opacity = 0.75, fill = TRUE, fillColor = labelTitles, bringToFront = TRUE)
+#m<-leaflet(data=mergeStuff) %>% addTiles() %>% addPolygons(fillColor=~pal(exceedCount),fillOpacity=0.8,color="#BDBDC3",weight=1)
 return (m)
 }
+
+#differing data sets used
 genDataMap("/home/starship9/Desktop/SNU/Data Mining/CSD342_DataMining/GLA2/annual_all_1995.csv")
 genDataMap("/home/starship9/Desktop/SNU/Data Mining/CSD342_DataMining/GLA2/annual_all_2000.csv")
 genDataMap("/home/starship9/Desktop/SNU/Data Mining/CSD342_DataMining/GLA2/annual_all_2005.csv")
 genDataMap("/home/starship9/Desktop/SNU/Data Mining/CSD342_DataMining/GLA2/annual_all_2010.csv")
 genDataMap("/home/starship9/Desktop/SNU/Data Mining/CSD342_DataMining/GLA2/annual_all_2016.csv")
-#%>% addLegend(position='bottomright', colors = labelTitles,labels = labelTitles, title = 'Pollution data') 
-#palette(rainbow(nrow(colorCount)))
 
-
-#m <- leaflet(reqData) %>% addTiles('http://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', 
-                              #attribution='Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>') 
-#m %>% setView(-95.71289,37.09024, zoom = 8)
-#m %>% addCircles(lng = reqData$Longitude, lat = reqData$Latitude, popup=reqData$`Parameter Name`, weight = 3, radius=40, 
-                 #color="#ffa500", stroke = TRUE, fillOpacity = 0.8)
-#m
-
-#library(plotly)
-#l <- list(color = "rgba(255,255,255,1)", width = 1)
-#g <- list(scope = 'usa')
-#per_million_plot <- plot_ly(tbl_df(reqData$`Arithmetic Mean`), z = reqData$`Arithmetic Mean`, text = paste(reqData$`State Name`, reqData$`County Name`, reqData$`City Name`, reqData$`Parameter Name`,sep = " | "), locations = reqData$`State Name`, type = 'choropleth',
-#                            locationmode = 'USA-states', color = reqData$`Arithmetic Mean`, colors = 'Purples',
-#                            marker = list(line = l), colorbar = list(title = "Pollution choropleth", lenmode = "pixels",
-#                                                                     titleside = "right", xpad = 0, ypad = 0)) %>%
-#  layout(title = 'Pollution data for 2016', geo = g)
-
-#per_million_plot
-
-genPlotChoro<-function(x){
-  library(plotly)
-  annual_all_2016 <- read_csv(x)
-  library(dplyr) 
-  reqData<-select(annual_all_2016,`State Code`,`Year`,`Parameter Name`, `Observation Count`,`Arithmetic Mean`,`Completeness Indicator`,`Sample Duration` ,`State Name`, `County Name`, `City Name`,`Latitude`,`Longitude`,`Primary Exceedance Count`)%>%filter(`Completeness Indicator`!='N')  
-  reqData$hover<-with(reqData,paste(`State Name`,'<br>',`Parameter Name`, '<br>', `Primary Exceedance Count`, '<br>', `Year`, '<br>' ))
-  
-  l<-list(color = toRGB("white"), width = 2)    
-
-  g<-list(scope = 'usa', projection = list(type = 'albers usa'),showlakes = TRUE, lakecolor = toRGB('white'))
-  
-  #p<-plot_geo(reqData, locationmode = 'USA-states') %>% add_trace(z = ~`Primary Exceedance Count`, text = ~hover, locations = ~`State Code`,color = ~'Primary Exceedance Count',colors = 'Purples') %>% colorbar(title = "Pollution data") %>% layout(title = '2016 Air pollution data', geo = g)
-  p <- plot_geo(reqData, locationmode = 'USA-states') %>%
-    add_trace(
-      z = ~`Primary Exceedance Count`, text = ~hover, locations = ~`State Code`,
-      color = ~`Primary Exceedance Count`, colors = 'Purples'
-    ) %>%
-    colorbar(title = "Primary Exceedance Count") %>%
-    layout(
-      title = 'Test choropleth',
-      geo = g
-    )
-  
-  
-  return (p)
-}
-
-genPlotChoro("/home/starship9/Desktop/SNU/Data Mining/CSD342_DataMining/GLA2/annual_all_2016.csv")
-
-
-library(plotly)
-df <- read.csv("/home/starship9/Desktop/SNU/Data Mining/CSD342_DataMining/GLA2/annual_all_1995.csv")
-df$hover <- with(df, paste(State.Name, '<br>', "Exceedance count", Primary.Exceedance.Count, "Parameter", Parameter.Name, "<br>",
-                           "County name", County.Name, "City", City.Name,
-                           "<br>", "City", City.Name, "Parameter Code", Parameter.Code))
-# give state boundaries a white border
-l <- list(color = toRGB("white"), width = 2)
-# specify some map projection/options
-g <- list(
-  scope = 'usa',
-  projection = list(type = 'albers usa'),
-  showlakes = TRUE,
-  lakecolor = toRGB('white')
-)
-
-p <- plot_geo(df, locationmode = 'ANSI | USA-States') %>%
-  add_trace(
-    z = ~Primary.Exceedance.Count, text = ~hover, locations = ~State.Code,
-    color = ~Primary.Exceedance.Count, colors = 'Purples'
-  ) %>%
-  colorbar(title = "Primary Exceedance Count") %>%
-  layout(
-    title = 'Test Choropleth',
-    geo = g
-  )
-#chart_link = plotly_POST(p, filename="choropleth/ag")
-#chart_link
-p
-
-
-
-df <- read.csv("https://raw.githubusercontent.com/plotly/datasets/master/2011_us_ag_exports.csv")
-df$hover <- with(df, paste(state, '<br>', "Beef", beef, "Dairy", dairy, "<br>",
-                           "Fruits", total.fruits, "Veggies", total.veggies,
-                           "<br>", "Wheat", wheat, "Corn", corn))
-# give state boundaries a white border
-l <- list(color = toRGB("white"), width = 2)
-# specify some map projection/options
-g <- list(
-  scope = 'usa',
-  projection = list(type = 'albers usa'),
-  showlakes = TRUE,
-  lakecolor = toRGB('white')
-)
-
-p <- plot_geo(df, locationmode = 'USA-states') %>%
-  add_trace(
-    z = ~total.exports, text = ~hover, locations = ~code,
-    color = ~total.exports, colors = 'Purples'
-  ) %>%
-  colorbar(title = "Millions USD") %>%
-  layout(
-    title = '2011 US Agriculture Exports by State<br>(Hover for breakdown)',
-    geo = g
-  )
-
-p
-
-#testing choroplethr
-library(choroplethr)
-library(choroplethrAdmin1)
-
-
-df <- read.csv("/home/starship9/Desktop/SNU/Data Mining/CSD342_DataMining/GLA2/annual_all_1995.csv")
-head(df)
-library(dplyr)
-df$region<-tolower(df$State.Name)
-df$value<-df$Primary.Exceedance.Count
-
-testDF<-select(df,region,value) %>% filter(!is.na(value),value>0)
-testDF$region<-unique(testDF$region)
-admin1_choropleth("united states of america",testDF,title="test choropleth", legend = "pollution data",buckets = 1,zoom=NULL)
-
-
-
+#generating choropleth
 library(sp)
 library(rgdal)
 library(maptools)
@@ -441,6 +322,9 @@ leaflet() %>% addTiles() %>%
 
 library(dplyr)
 
+#plotting line/pie graphs
+
+#getting the total amount of pollution for a particular year
 s2016<-sum(dat$arithmetic.mean)
 s2000<-sum(dat2000$arithmetic.mean)
 s2010<-sum(dat2010$arithmetic.mean)
@@ -450,6 +334,7 @@ arithSum<-c(s2000,s2005,s2010,s2016)
 years<-c("2000","2005","2010","2016")
 
 
+#getting total particulate matter
 testDF<-subset(dat,parameter.code=="88101",select = ("arithmetic.mean"))
 #testDF
 sum2016<-sum(testDF$arithmetic.mean)
@@ -465,7 +350,7 @@ sum2010<-sum(testDF2010$arithmetic.mean)
 
 paramSum<-c(sum2000,sum2005,sum2010,sum2016)
 
-
+#getting ozone data
 testDFozone<-subset(dat,parameter.code=="42601",select = ("arithmetic.mean"))
 #testDF
 sum2016ozone<-sum(testDFozone$arithmetic.mean)
@@ -479,6 +364,7 @@ testDF2010ozone<-subset(dat2010,parameter.code=="42601",select = ("arithmetic.me
 #testDF
 sum2010ozone<-sum(testDF2010ozone$arithmetic.mean)
 
+#CO!
 testDFco<-subset(dat,parameter.code=="42101",select = ("arithmetic.mean"))
 #testDF
 sum2016co<-sum(testDFco$arithmetic.mean)
@@ -511,6 +397,12 @@ p <- plot_ly(dataFrame, labels = ~rownames(dataFrame), values = ~coSum, type = '
          xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
          yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
 p
+
+ozoneP <- plot_ly(dataFrame, labels = ~rownames(dataFrame), values = ~ozoneSum, type = 'pie') %>%
+  layout(title = 'Yearly Ozone distribution',
+         xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+         yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE))
+ozoneP
 #genChoro("annual_all_1995.csv")
 #genChoro("annual_all_2005.csv")
 #genChoro("annual_all_2010.csv")
