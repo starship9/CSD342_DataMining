@@ -465,10 +465,10 @@ sum2010<-sum(testDF2010$arithmetic.mean)
 
 paramSum<-c(sum2000,sum2005,sum2010,sum2016)
 
-dataFrame<-data.frame(paramSum,years)
+dataFrame<-data.frame(paramSum,years,arithSum)
 #genChoro("annual_all_2016.csv")
 library(plotly)
-lineP<-plot_ly(dataFrame,x = ~years, y = ~paramSum, type = 'scatter', mode = 'lines')
+lineP<-plot_ly(dataFrame,x = ~years, y = ~paramSum, name = 'particulate matter',type = 'scatter', mode = 'lines') %>% add_trace(y = ~arithSum,name = 'total Pollution',mode='line')
 lineP
 
 
