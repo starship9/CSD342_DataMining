@@ -290,7 +290,7 @@ popup_dat2005 <- paste0("<strong>County: </strong>",
 #END PARSE
 
 #END DATA
-pal <- colorQuantile("PuBu", NULL, n = 9)
+pal <- colorQuantile("RdPu", NULL, n = 9)
 # Render final map in leaflet.
 leaflet() %>% addTiles() %>%
   addPolygons(data = leafmap,fillColor = ~pal(airqlty), 
