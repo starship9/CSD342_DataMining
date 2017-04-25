@@ -114,11 +114,28 @@ return (m)
 }
 
 #differing data sets used
-genDataMap("/home/starship9/Desktop/SNU/Data Mining/CSD342_DataMining/GLA2/annual_all_1995.csv")
-genDataMap("/home/starship9/Desktop/SNU/Data Mining/CSD342_DataMining/GLA2/annual_all_2000.csv")
-genDataMap("/home/starship9/Desktop/SNU/Data Mining/CSD342_DataMining/GLA2/annual_all_2005.csv")
-genDataMap("/home/starship9/Desktop/SNU/Data Mining/CSD342_DataMining/GLA2/annual_all_2010.csv")
-genDataMap("/home/starship9/Desktop/SNU/Data Mining/CSD342_DataMining/GLA2/annual_all_2016.csv")
+map1995<-genDataMap("/home/starship9/Desktop/SNU/Data Mining/CSD342_DataMining/GLA2/annual_all_1995.csv")
+map2000<-genDataMap("/home/starship9/Desktop/SNU/Data Mining/CSD342_DataMining/GLA2/annual_all_2000.csv")
+map2005<-genDataMap("/home/starship9/Desktop/SNU/Data Mining/CSD342_DataMining/GLA2/annual_all_2005.csv")
+map2010<-genDataMap("/home/starship9/Desktop/SNU/Data Mining/CSD342_DataMining/GLA2/annual_all_2010.csv")
+map2016<-genDataMap("/home/starship9/Desktop/SNU/Data Mining/CSD342_DataMining/GLA2/annual_all_2016.csv")
+
+print(map1995)
+print(map2000)
+print(map2005)
+print(map2010)
+print(map2016)
+#library(htmlwidgets)
+#saveWidget(map1995, file = "map1995.html", selfcontained = F)
+
+#saveWidget(map2000, file = "map2000.html", selfcontained = F)
+
+#saveWidget(map2010, file = "map2010.html", selfcontained = F)
+
+#saveWidget(map2016, file = "map2016.html", selfcontained = F)
+
+#saveWidget(map2005, file = "map2005.html", selfcontained = F)
+
 
 #generating choropleth
 library(sp)
@@ -290,9 +307,9 @@ popup_dat2005 <- paste0("<strong>County: </strong>",
 #END PARSE
 
 #END DATA
-pal <- colorQuantile("RdPu", NULL, n = 9)
+pal <- colorQuantile("YlOrRd", NULL, n = 9)
 # Render final map in leaflet.
-leaflet() %>% addTiles() %>%
+polMap<-leaflet() %>% addTiles() %>%
   addPolygons(data = leafmap,fillColor = ~pal(airqlty), 
               fillOpacity = 0.8, 
               color = "#BDBDC3", 
@@ -318,7 +335,12 @@ leaflet() %>% addTiles() %>%
                                                    baseGroups = c("2016","2010","2005", ## group 1
                                                                   "2000" ## group 2
                                                    ),
-                                                   options = layersControlOptions(collapsed = FALSE)) ## we want our control to be seen right away
+                                                   options = layersControlOptions(collapsed = FALSE)) 
+print(polMap)
+
+library(htmlwidgets)
+saveWidget(polMap, file = "polMap.html", selfcontained = F)
+
 
 library(dplyr)
 
