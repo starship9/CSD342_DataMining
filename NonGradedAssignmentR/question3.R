@@ -8,14 +8,15 @@ raw.text<-scan(x,what="char",sep="")
 #head(raw.text)
 #converting to lower case
 raw.text<-tolower(raw.text)
+#raw.text <- tm_map(raw.text, removeWords, stopwords("english"))
 #whatsappDF$V6<-gsub('\\Saini+', '', whatsappDF$V6)
-raw.text<-gsub(' a ','',raw.text)
-raw.text<-gsub(' an ','',raw.text)
-raw.text<-gsub(' of ','',raw.text)
-raw.text<-gsub(' is ','',raw.text)
-raw.text<-gsub(' the ','',raw.text)
-raw.text<-gsub(' and ','',raw.text)
-raw.text<-gsub(' is ','',raw.text)
+raw.text<-gsub('+a+','',raw.text)
+raw.text<-gsub('+an+','',raw.text)
+raw.text<-gsub('+of+','',raw.text)
+raw.text<-gsub('+is+','',raw.text)
+raw.text<-gsub('+the+','',raw.text)
+raw.text<-gsub('+and+','',raw.text)
+raw.text<-gsub('+is+','',raw.text)
 #raw.text<-tm_map(x,removeWords,stopwords("english"))
 #splitting wrt whitespace
 wordList.txt<-strsplit(raw.text,"\\W+",perl=TRUE)
@@ -61,6 +62,31 @@ g<-ggplot(textMoreThan10Freq,aes(x=textMoreThan10Freq$Word, y = textMoreThan10Fr
 return (g)
 }
 #graph for the larger text file
+
+genDTM<-function(x){
+  txt <- readLines(x)
+  corpus <- Corpus(VectorSource(txt))
+  
+  # clean
+  corpus <- tm_map(corpus, removePunctuation)
+  corpus <- tm_map(corpus, removeNumbers)
+  corpus <- tm_map(corpus, tolower)
+  corpus <- tm_map(corpus, removeWords, stopwords("english")) 
+  corpus <- tm_map(corpus, PlainTextDocument)
+  
+  # create dtm and get terms
+  dtm <- DocumentTermMatrix(corpus)
+  return(dtm$dimnames$Terms)
+}
+
+
+
+
+
+
+
+
+
 genWordGraph("largeTxt.txt",2000)
 
 #graph for the smaller text file
