@@ -77,7 +77,8 @@ return (g)
   library(arulesViz)
   
   plot(rules, method="graph", control=list(type="items"))
-  #wordcloud(textMoreThan10Freq$Word, random.order = FALSE, max.words = 30, col = brewer.pal(9,"Blues"))
+  library(wordcloud)
+  wordcloud(textMoreThan10Freq$Word, random.order = FALSE, max.words = 30, col = brewer.pal(9,"Blues"))
 
   #plot(rules)
   #plot(rules, method="paracoord", control=list(reorder=TRUE))
