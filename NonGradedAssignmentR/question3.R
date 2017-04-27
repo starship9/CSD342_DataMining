@@ -10,13 +10,15 @@ genWordGraph<-function(x,freq){
   raw.text<-tolower(raw.text)
   #raw.text <- tm_map(raw.text, removeWords, stopwords("english"))
   #whatsappDF$V6<-gsub('\\Saini+', '', whatsappDF$V6)
-  #raw.text<-gsub('+a+','',raw.text)
-  #raw.text<-gsub('+an+','',raw.text)
-  #raw.text<-gsub('+of+','',raw.text)
-  #raw.text<-gsub('+is+','',raw.text)
-  #raw.text<-gsub('+the+','',raw.text)
-  #raw.text<-gsub('+and+','',raw.text)
-  #raw.text<-gsub('+is+','',raw.text)
+  raw.text<-gsub('+that+','',raw.text)
+  raw.text<-gsub('+a+','',raw.text)
+  raw.text<-gsub('+an+','',raw.text)
+  raw.text<-gsub('+of+','',raw.text)
+  raw.text<-gsub('+is+','',raw.text)
+  raw.text<-gsub('+the+','',raw.text)
+  raw.text<-gsub('+and+','',raw.text)
+  raw.text<-gsub('+in+','',raw.text)
+  raw.text<-gsub('+it+','',raw.text)
   #raw.text<-tm_map(x,removeWords,stopwords("english"))
   #splitting wrt whitespace
   wordList.txt<-strsplit(raw.text,"\\W+",perl=TRUE)
@@ -54,12 +56,12 @@ genWordGraph<-function(x,freq){
   #text.sortedFreq.list
   #text.sortedTable<-paste(names(text.sortedFreq.list),text.sortedFreq.list,sep="    ")
   #head(text.sortedTable)
-  #library(ggplot2)
+  library(ggplot2)
   
   #graph
- # g<-ggplot(textMoreThan10Freq,aes(x=textMoreThan10Freq$Word, y = textMoreThan10Freq$Frequency, fill = textMoreThan10Freq$Word)) + geom_bar(stat="identity") + labs(x = "Word", y = "Frequency", title = "Non Graded Assignment")
+ g<-ggplot(textMoreThan10Freq,aes(x=textMoreThan10Freq$Word, y = textMoreThan10Freq$Frequency, fill = textMoreThan10Freq$Word)) + geom_bar(stat="identity") + labs(x = "Word", y = "Frequency", title = "Non Graded Assignment")
   #getwd()
-#  return (g)
+return (g)
   
   library(arules)
   
@@ -75,10 +77,14 @@ genWordGraph<-function(x,freq){
   library(arulesViz)
   
   plot(rules, method="graph", control=list(type="items"))
+  #wordcloud(textMoreThan10Freq$Word, random.order = FALSE, max.words = 30, col = brewer.pal(9,"Blues"))
+
+  #plot(rules)
+  #plot(rules, method="paracoord", control=list(reorder=TRUE))
 }
 #graph for the larger text file
 
-genWordGraph("largeTxt.txt",2000)
+genWordGraph("largeTxt.txt",1000)
 
 #graph for the smaller text file
 genWordGraph("ngla1.txt",10)
