@@ -60,32 +60,19 @@ library(ggplot2)
 g<-ggplot(textMoreThan10Freq,aes(x=textMoreThan10Freq$Word, y = textMoreThan10Freq$Frequency, fill = textMoreThan10Freq$Word)) + geom_bar(stat="identity") + labs(x = "Word", y = "Frequency", title = "Non Graded Assignment")
 #getwd()
 return (g)
+
+library(arules)
+data <- data.frame(sapply(textMoreThan10Freq,as.factor))
+#textMoreThan10Freq$Word<-discretize(textMoreThan10Freq$Word)
+#textMoreThan10Freq$Frequency<-discretize(textMoreThan10Freq$Frequency)
+rules<-apriori(data)
+inspect(rules)
+rules.sorted<-sort(rules,by="lift")
+inspect(rules.sorted)
+
+
 }
 #graph for the larger text file
-
-genDTM<-function(x){
-  txt <- readLines(x)
-  corpus <- Corpus(VectorSource(txt))
-  
-  # clean
-  corpus <- tm_map(corpus, removePunctuation)
-  corpus <- tm_map(corpus, removeNumbers)
-  corpus <- tm_map(corpus, tolower)
-  corpus <- tm_map(corpus, removeWords, stopwords("english")) 
-  corpus <- tm_map(corpus, PlainTextDocument)
-  
-  # create dtm and get terms
-  dtm <- DocumentTermMatrix(corpus)
-  return(dtm$dimnames$Terms)
-}
-
-
-
-
-
-
-
-
 
 genWordGraph("largeTxt.txt",2000)
 
